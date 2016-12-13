@@ -1,0 +1,19 @@
+7 Segments
+==========
+
+System contains
+	Nios II/e processor
+	128kB on-chip memory
+	JTAG UART
+
+Documentation of the 6 digits 7 Segments extension for the DE0 Nano SoC can be found on this github
+
+The main signal for configuring this board can be found here:
+	SelSeg(7 downto 0)  selects the which of the 7 segments: Active-high
+	nSelDig(5 downto 0) selects which of the 6 displays is selected: Active-low
+	Reset_Led           discharge all the capacitors (reset the display): Active-high
+
+The TCL script contains the pin assigment used.
+
+
+
