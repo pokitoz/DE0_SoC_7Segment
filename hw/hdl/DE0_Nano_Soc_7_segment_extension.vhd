@@ -44,7 +44,10 @@ architecture rtl of DE0_Nano_Soc_7_segment_extension is
 	component system_NiosII is
 		port (
 			clk_clk       : in std_logic := '0'; --   clk.clk
-			reset_reset_n : in std_logic := '0'  -- reset.reset_n
+			reset_reset_n : in std_logic := '0';  -- reset.reset_n
+			display_segment_0_reset_led_writeresponsevalid_n : out std_logic;                           -- writeresponsevalid_n
+			display_segment_0_selseg_readdata                : out std_logic_vector(7 downto 0);        -- readdata
+			display_segment_0_nseldig_readdata               : out std_logic_vector(5 downto 0) 
 		);
 	end component system_NiosII;
 begin
@@ -53,10 +56,13 @@ begin
 	system:  component system_NiosII
 	port map (
 		clk_clk       => FPGA_CLK1_50,
-		reset_reset_n => KEY_N(0)
+		reset_reset_n => KEY_N(0),
+		display_segment_0_reset_led_writeresponsevalid_n => Reset_Led,
+		display_segment_0_selseg_readdata  => SelSeg,
+		display_segment_0_nseldig_readdata  => nSelDig
 	);
 	
 	-- Set a value on the LEDs to check the version of the project running on the board
-	LED <= "11110001";
+	LED <= "11110010";
 
 end;
