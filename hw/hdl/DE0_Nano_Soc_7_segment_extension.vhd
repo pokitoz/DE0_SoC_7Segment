@@ -34,13 +34,28 @@ entity DE0_Nano_Soc_7_segment_extension is
         Reset_Led        : out   std_logic;
         nSelDig          : out   std_logic_vector(5 downto 0);
         SwLed            : in    std_logic_vector(7 downto 0);
-        nButton          : in    std_logic_vector(3 downto 0)
+        nButton          : in    std_logic_vector(3 downto 0);
         LedButton        : out   std_logic_vector(3 downto 0)
     );
 end entity DE0_Nano_Soc_7_segment_extension;
 
 architecture rtl of DE0_Nano_Soc_7_segment_extension is
+
+	component system_NiosII is
+		port (
+			clk_clk       : in std_logic := '0'; --   clk.clk
+			reset_reset_n : in std_logic := '0'  -- reset.reset_n
+		);
+	end component system_NiosII;
 begin
+
+
+	system:  component system_NiosII
+	port map (
+		clk_clk       => FPGA_CLK1_50,
+		reset_reset_n => KEY_N(0)
+	);
+	
 	-- Set a value on the LEDs to check the version of the project running on the board
 	LED <= "11110001";
 
