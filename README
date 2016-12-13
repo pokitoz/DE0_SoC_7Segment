@@ -20,6 +20,12 @@ Tools > Tcl Scripts > pin_assignment_DE0_Nano_SoC_7_segment_extension.tcl > Run
 
 Please generate the Qsys system before compiling. Or add .qsys instead of .qpi inside the quartus project
 
+To program the FPGA:
+Programer:
+        > Hardware Setup... > Select the hardware
+        > Auto Detect > Select Device > 5CSEMA4
+        
+For device 5CSEMA4, Add File... and select .sof file generated (should be in 'output_files' folder)
+Check box "Program/Configure"
 
-
-
+The extension should be plugged on GPIO1
