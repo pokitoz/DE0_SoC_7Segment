@@ -63,6 +63,6 @@ begin
 	);
 	
 	-- Set a value on the LEDs to check the version of the project running on the board
-	LED <= "11110010";
+	LED <= "11000000";
 
 end;
