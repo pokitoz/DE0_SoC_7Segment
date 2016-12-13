@@ -1,6 +1,8 @@
 7 Segments
 ==========
 
+DE0 Nano SoC: 5csema4u23c6
+
 System contains
 	Nios II/e processor
 	128kB on-chip memory
@@ -14,6 +16,7 @@ The main signal for configuring this board can be found here:
 	Reset_Led           discharge all the capacitors (reset the display): Active-high
 
 The TCL script contains the pin assigment used.
+Tools > Tcl Scripts > pin_assignment_DE0_Nano_SoC_7_segment_extension.tcl > Run
 
 
 
