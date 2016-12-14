@@ -29,24 +29,26 @@ end entity RTC_component;
 architecture rtl of RTC_component is
 
         constant LED_POSSIBLE_VALUE : integer := 16;
-        constant NUMBER_OF_SEGMENTS : integer := 8; -- 7 segment and a dot
+        constant NUMBER_OF_SEGMENTS : integer := 8;     -- 7 segment and a dot
         constant NUMBER_OF_DISPLAYS : integer := 6; 
+        constant LED_ACTIVE_DEFAULT : integer := 41500; -- 1/6ms
+        constant MS_CYCLES_DEFAULT  : integer := 50000; -- 1ms
 
         -- Input clock is 50MHz
         -- Counter to achieve the different timings
-        signal LED_ACTIVE                     : integer := 41500; -- 1/6ms
-        signal MS_CYCLES                      : integer := 50000; -- 1ms
+        signal LED_ACTIVE                     : integer;
+        signal MS_CYCLES                      : integer; 
         signal counter_ms                     : integer;
 
-        signal enable_led               : std_logic;
+        signal enable_led                     : std_logic;
         
         -- Integer value of SelDig
-        signal nSelDig_int_tmp          : integer range 0 to NUMBER_OF_DISPLAYS-1;
-        signal nSelDig_tmp              : std_logic_vector(NUMBER_OF_DISPLAYS-1 downto 0);
+        signal nSelDig_int_tmp                : integer range 0 to NUMBER_OF_DISPLAYS-1;
+        signal nSelDig_tmp                    : std_logic_vector(NUMBER_OF_DISPLAYS-1 downto 0);
         
 
         -- Store the integer value of the different digits
-        signal SelSeg_tmp               : std_logic_vector(NUMBER_OF_SEGMENTS-1 downto 0);
+        signal SelSeg_tmp                     : std_logic_vector(NUMBER_OF_SEGMENTS-1 downto 0);
         type INT_ARRAY is array (0 to NUMBER_OF_DISPLAYS-1) of integer range 0 to LED_POSSIBLE_VALUE-1;
         signal values : INT_ARRAY;
       
@@ -54,19 +56,16 @@ architecture rtl of RTC_component is
 
 begin
 
-
         reset_led_signal: process(clk, rst)
-        variable unsigned_value : unsigned(3 downto 0);
         begin
                 if(rst = '1') then
-                        Reset_Led  <= '1';
+                        Reset_Led  <= '0';
                 else 
-                        
-                        if(counter_ms > LED_ACTIVE or counter_ms = 0) then
+                        if(counter_ms > LED_ACTIVE) then
                                 Reset_Led  <= '1';
                         else
                                 Reset_Led  <= '0';
-                        end if;        
+                        end if;
                 end if;
                 
         end process;
@@ -106,8 +105,8 @@ begin
                                 values(i) <= i+1;
                         end loop;
                         
-                        LED_ACTIVE <= 41500;
-                        MS_CYCLES  <= 50000;
+                        LED_ACTIVE <= LED_ACTIVE_DEFAULT;
+                        MS_CYCLES  <= MS_CYCLES_DEFAULT;
 
                 elsif rising_edge(clk) then
                         if (mm_slave_write = '1') then
@@ -154,13 +153,16 @@ begin
                         counter_ms <= 0;
                         enable_led <= '0';
                 elsif rising_edge(clk) then
-                        enable_led <= '0';      
+
                         if (counter_ms = MS_CYCLES-1) then
                                 counter_ms <= 0;
                                 enable_led <= '1';
+                        else
+                                enable_led <= '0';
+                                counter_ms <= counter_ms + 1;                     
                         end if;
 
-                        counter_ms <= counter_ms + 1;
+
 
                 
                 end if;                        
