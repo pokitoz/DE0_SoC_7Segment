@@ -77,7 +77,8 @@ begin
                                 "111011" when nSelDig_int_tmp = 2 else
                                 "110111" when nSelDig_int_tmp = 3 else
                                 "101111" when nSelDig_int_tmp = 4 else
-                                "011111";
+                                "011111" when nSelDig_int_tmp = 5 else
+                                "111111";
 
         -- Do not select any if counter_ms is higher than 1/6ms
         nSelDig <= (others => '1') when (counter_ms > LED_ACTIVE-1 or counter_ms = 0) 
@@ -137,9 +138,10 @@ begin
                         -- "Clock divider" to count each ms
                         if enable_led = '1' then
 
-                                if(nSelDig_int_tmp = NUMBER_OF_DISPLAYS-1) then
-                                          nSelDig_int_tmp <= 0;                              
+                                if(nSelDig_int_tmp = NUMBER_OF_DISPLAYS - 1) then
+                                          nSelDig_int_tmp <= 0;    
                                 end if;
+
                                 nSelDig_int_tmp <= nSelDig_int_tmp + 1;
 
                         end if;

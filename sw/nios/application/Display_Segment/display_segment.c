@@ -3,17 +3,17 @@
 #include "io.h"
 #include "unistd.h"
 
-#define NUMBER_DISPLAY 6
-#define MAX_DIGIT 9
+#define DISPLAY_SEGMENT_NUMBER_DISPLAY 6
+#define DISPLAY_SEGMENT_MAX_DIGIT 9
 
 int main(void) {
 	alt_putstr("Display Segment Program!\n");
 	volatile int count = 0x2142FF;
-	IOWR_32DIRECT(DISPLAY_SEGMENT_0_BASE, 4, 41500);
+	IOWR_32DIRECT(DISPLAY_SEGMENT_0_BASE, 4, 20000);
 	IOWR_32DIRECT(DISPLAY_SEGMENT_0_BASE, 8, 50000);
 	IOWR_32DIRECT(DISPLAY_SEGMENT_0_BASE, 0, count);
 
-	char v[NUMBER_DISPLAY] = { 0 };
+	char v[DISPLAY_SEGMENT_NUMBER_DISPLAY] = { 0 };
 	count = 0;
 	/* Event loop never exits. */
 	while (1) {
@@ -25,8 +25,8 @@ int main(void) {
 
 		v[0]++;
 		int i = 0;
-		for (i = 0; i < NUMBER_DISPLAY; i++) {
-			if (v[i] == MAX_DIGIT + 1) {
+		for (i = 0; i < DISPLAY_SEGMENT_NUMBER_DISPLAY; i++) {
+			if (v[i] == DISPLAY_SEGMENT_MAX_DIGIT + 1) {
 				v[i + 1]++;
 				v[i] = 0;
 			}
