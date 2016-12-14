@@ -17,7 +17,7 @@ entity RTC_component is
         Reset_Led               : out   std_logic;
 
         -- Avalon Memory Mapped Slave
-        mm_slave_address     : in  std_logic; 
+        mm_slave_address     : in  std_logic_vector(1 downto 0); 
         mm_slave_read        : in  std_logic;
         mm_slave_readdata    : out std_logic_vector(31 downto 0);
         mm_slave_write       : in  std_logic;
@@ -34,12 +34,11 @@ architecture rtl of RTC_component is
 
         -- Input clock is 50MHz
         -- Counter to achieve the different timings
-        constant LED_ACTIVE                 : integer := 41500; -- 1/6ms
-        constant MS_CYCLES                  : integer := 50000; -- 1ms
-        signal counter_ms                   : integer range 0 to MS_CYCLES-1;
+        signal LED_ACTIVE                     : integer := 41500; -- 1/6ms
+        signal MS_CYCLES                      : integer := 50000; -- 1ms
+        signal counter_ms                     : integer;
 
         signal enable_led               : std_logic;
-        signal enable_reset             : std_logic;
         
         -- Integer value of SelDig
         signal nSelDig_int_tmp          : integer range 0 to NUMBER_OF_DISPLAYS-1;
@@ -55,7 +54,23 @@ architecture rtl of RTC_component is
 
 begin
 
-        enable_reset <= '1' when counter_ms > LED_ACTIVE else '0';
+
+        reset_led_signal: process(clk, rst)
+        variable unsigned_value : unsigned(3 downto 0);
+        begin
+                if(rst = '1') then
+                        Reset_Led  <= '1';
+                else 
+                        
+                        if(counter_ms > LED_ACTIVE or counter_ms = 0) then
+                                Reset_Led  <= '1';
+                        else
+                                Reset_Led  <= '0';
+                        end if;        
+                end if;
+                
+        end process;
+
 
         -- Decode the integer value to a binary value representing the selected display
         nSelDig_tmp <= "111110" when nSelDig_int_tmp = 0 else
@@ -69,7 +84,6 @@ begin
         nSelDig <= (others => '1') when (counter_ms > LED_ACTIVE-1 or counter_ms = 0) 
                         else nSelDig_tmp;
 
-        Reset_Led <= enable_reset;
 
         -- Decode the value that should be printed to the display selected
         SelSeg <= X"3F" when values(nSelDig_int_tmp) = 0 else
@@ -89,17 +103,24 @@ begin
         begin
                 if(rst = '1') then
                         for i in 0 to INT_ARRAY'length - 1 loop
-                                values(i) <= i;
+                                values(i) <= i+1;
                         end loop;
+                        
+                        LED_ACTIVE <= 41500;
+                        MS_CYCLES  <= 50000;
 
                 elsif rising_edge(clk) then
                         if (mm_slave_write = '1') then
                                 case mm_slave_address is
-                                when '0' =>
+                                when "00" =>
                                         for i in 0 to INT_ARRAY'length - 1 loop
                                                 unsigned_value := unsigned(mm_slave_writedata(4*(i+1) - 1 downto 4*i));
                                                 values(i) <= to_integer(unsigned_value);
                                         end loop;
+                                when "01" =>
+                                        LED_ACTIVE <= to_integer(unsigned(mm_slave_writedata));
+                                when "10" => 
+                                        MS_CYCLES  <= to_integer(unsigned(mm_slave_writedata));                          
                                 when others => 
                                         null;                                
                                 end case;
@@ -111,7 +132,6 @@ begin
         display_value : process(clk, rst)
         begin
                 if(rst = '1') then
-                        nSelDig_int_tmp <= values(0);
                         nSelDig_int_tmp <= 0;
 
                 elsif rising_edge(clk) then
@@ -130,17 +150,19 @@ begin
 
         cycle_counter : process(clk, rst)
         begin
-                if(rst = '1') then
+                if (rst = '1') then
                         counter_ms <= 0;
                         enable_led <= '0';
                 elsif rising_edge(clk) then
-                        if(counter_ms = MS_CYCLES-1) then
+                        enable_led <= '0';      
+                        if (counter_ms = MS_CYCLES-1) then
                                 counter_ms <= 0;
                                 enable_led <= '1';
-                        else
-                                counter_ms <= counter_ms + 1;
-                                enable_led <= '0';
                         end if;
+
+                        counter_ms <= counter_ms + 1;
+
+                
                 end if;                        
         end process;
         
